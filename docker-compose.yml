@@ -1,0 +1,24 @@
+services:
+  db:
+    image: postgres:14
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - booklog_pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./:/workspace   # весь проект в /workspace
+      - ./backend:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+    restart: on-failure
+
+volumes:
+  booklog_pgdata:
