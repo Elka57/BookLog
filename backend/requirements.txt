@@ -5,4 +5,9 @@ psycopg2-binary
 Pillow>=9.0.0
 
 django-extensions
+djangorestframework-simplejwt
+
+pytest>=7.0
+pytest-django>=4.0
+
 

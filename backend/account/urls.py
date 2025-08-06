@@ -1,9 +1,8 @@
-from django.urls import path
+from django.urls import include, path
 from . import views
 
 app_name = 'account'      
 
 urlpatterns = [
-    
-    # другие маршруты 
+    path('api/', include('account.api.urls')),
 ]

@@ -5,6 +5,7 @@ FROM python:3.13-slim
 ENV PYTHONDONTWRITEBYTECODE 1   # не сохранять .pyc-файлы
 ENV PYTHONUNBUFFERED 1          # сразу выводить логи
 
+
 # 3. Установка системных пакетов для Pillow, сборки зависимостей и Git Flow
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -31,3 +32,4 @@ EXPOSE 8000
 
 # 8. Команда по умолчанию — запустить dev-сервер
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
