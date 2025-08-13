@@ -6,6 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE 1   # не сохранять .pyc-файлы
 ENV PYTHONUNBUFFERED 1          # сразу выводить логи
 
 
+
 # 3. Установка системных пакетов для Pillow, сборки зависимостей и Git Flow
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \

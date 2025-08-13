@@ -15,9 +15,22 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/blacklist/', TokenBlacklistView.as_view(), name='token_blacklist'),
 
+    # dj-rest-auth: login, logout, password change
+    path('api/auth/', include('dj_rest_auth.urls')),
+
+    # регистрация + подтверждение email + сброс пароля
+    path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
+    
     path('admin/', admin.site.urls),
-    path('account/', include('account.urls')),
-    path('jornal/',  include('jornal.urls')),
+    path('api/users/', include('users.urls')),
+    path(
+        'api/journal/',
+        include(
+          ('journal.urls', 'journal'),   # <- tuple из (путь к urls, app_name)
+          namespace='journal'            # <- чтобы reverse('journal:…') работал 100%
+        )
+),
+
 ]
 
 # В режиме DEBUG раздаём медиа-файлы

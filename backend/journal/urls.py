@@ -1,8 +1,8 @@
 from django.urls import include, path
 from . import views
 
-app_name = 'account'      
+app_name = 'journal'      
 
 urlpatterns = [
-    path('api/', include('account.api.urls')),
+    path('', include('journal.api.urls')),
 ]

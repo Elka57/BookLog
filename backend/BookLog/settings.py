@@ -24,7 +24,7 @@ ALLOWED_HOSTS = config(
 )
 
 # Настройка кастомной модели пользователя
-AUTH_USER_MODEL = "account.User"
+AUTH_USER_MODEL = "users.User"
 
 
 
@@ -41,12 +41,25 @@ INSTALLED_APPS = [
     "django_extensions",
     # Django REST Framework
     'rest_framework',
+    'rest_framework.authtoken',  # ← добавь эту строку!
     'rest_framework_simplejwt.token_blacklist',
     'pytest_django',
+    'django_filters',
+    'rest_framework_roles',  # Must be after rest_framework
 
-    'account',
-    'jornal',
+    'users',
+    # allauth
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    # dj-rest-auth
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+
+    'journal',
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -55,6 +68,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -147,6 +161,18 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    # 2. Общие парсеры (мультипарт/формы/JSON)
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.MultiPartParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.JSONParser',
+    ],
+    # 3. Фильтры/поиск/сортировка — если используете
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
 }
 
 SIMPLE_JWT = {
@@ -155,6 +181,39 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+# Все email обязательны и требуют верификации
+#ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True
+
+# Пароль: подтверждение и валидация через Django
+ACCOUNT_PASSWORD_INPUT_RENDER_VALUE = False
+
+ACCOUNT_SIGNUP_FIELDS = [
+    'email*',
+    'username*',
+    'password1*',
+    'password2*',
+]
+
+DJ_REST_AUTH = {
+    'SIGNUP_FIELDS': {
+        'username': {
+            'required': False,
+            # 'read_only': False,  # можно при необходимости
+        },
+        'email': {
+            'required': True,
+            # 'read_only': False,
+        },
+    }
 }
 
 # Mail settings
@@ -191,4 +250,11 @@ LOGGING = {
             'propagate': False,
         },
     },
+}
+
+PROFILE_DELETION_TOKEN_EXPIRY = 24 * 3600  # например, 1 сутки
+
+REST_FRAMEWORK_ROLES = {
+  'ROLES': 'BookLog.roles.ROLES',
+  'DEFAULT_EXCEPTION_CLASS': 'rest_framework.exceptions.NotFound',
 }

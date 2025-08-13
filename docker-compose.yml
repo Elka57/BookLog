@@ -16,6 +16,8 @@ services:
       - ./backend:/app
     env_file:
       - .env
+    environment:
+      - WAKATIME_API_KEY    # автоматически подхватится из .env
     depends_on:
       - db
     restart: on-failure

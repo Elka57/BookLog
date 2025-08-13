@@ -9,5 +9,10 @@ djangorestframework-simplejwt
 
 pytest>=7.0
 pytest-django>=4.0
-
-
+django-filter
+rest-framework-roles
+django-allauth
+dj-rest-auth
+requests>=2.0
+factory-boy>=3.2.0
+pytest-factoryboy

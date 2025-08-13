@@ -1,6 +1,13 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from BookLog import settings
+from users.models import User
+
+class ApprovalStatus(models.IntegerChoices):
+  PENDING = 0, 'На проверке'
+  APPROVED = 1, 'Одобрен'
+  REJECTED = 2, 'Отклонен'
+
 
 class Author(models.Model):
   first_name = models.CharField(max_length=150, verbose_name="Имя")
@@ -9,6 +16,18 @@ class Author(models.Model):
   birthday = models.DateField(verbose_name="Дата рождения", null=True, blank=True)
   death = models.DateField(verbose_name="Дата смерти", null=True, blank=True)
   country = models.CharField(max_length=150, verbose_name="Страна", blank=True, null=True)
+  photo = models.ImageField(verbose_name="Фотография", upload_to="author_photos/", blank=True, null=True)
+  status = models.IntegerField(choices=ApprovalStatus.choices, verbose_name="Статус одобрения")
+  biography = models.TextField(verbose_name="Биография", blank=True, null=True)
+  created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Добавлено пользователем")
+
+  def approve(self):
+    self.status = ApprovalStatus.APPROVED
+    self.save(update_fields=['status'])
+
+  def reject(self):
+    self.status = ApprovalStatus.REJECTED
+    self.save(update_fields=['status'])
 
   def __str__(self):
     return f'{self.last_name} {self.first_name}'  # или любое поле, которое удобно показывать
@@ -17,11 +36,13 @@ class Author(models.Model):
 class Genre(models.Model):
   title = models.CharField(max_length=200, verbose_name="Название")
   description = models.CharField(max_length=200, verbose_name="Описание")
+  status = models.IntegerField(choices=ApprovalStatus.choices, verbose_name="Статус одобрения")
+  created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Добавлено пользователем")
 
   def __str__(self):
     return self.title
   
-class Types(models.IntegerChoices):
+class BookTypes(models.IntegerChoices):
   FICTION = 0, "Художественная"
   NON_FICTION = 1, "Нон-фикшн (не художественная)"
 
@@ -29,9 +50,11 @@ class Book(models.Model):
   title = models.CharField(max_length=200, verbose_name="Название")
   author = models.ForeignKey(Author, on_delete=models.CASCADE, verbose_name="Автор", related_name="books")
   genre = models.ForeignKey(Genre, on_delete=models.CASCADE, verbose_name="Жанр", related_name="books")
-  logo = models.ImageField(verbose_name="Картинка профиля", upload_to="book_logos/", blank=True, null=True)
+  logo = models.ImageField(verbose_name="Обложка", upload_to="book_logos/", blank=True, null=True)
   symbols = models.IntegerField(verbose_name="Количество символов", null=True, blank=True)
-  type = models.IntegerField(choices=Types.choices, verbose_name="Тип")
+  type = models.IntegerField(choices=BookTypes.choices, verbose_name="Тип")
+  status = models.IntegerField(choices=ApprovalStatus.choices, verbose_name="Статус одобрения")
+  created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Добавлено пользователем")
 
   def __str__(self):
     return f'{self.title} - {self.author}'
