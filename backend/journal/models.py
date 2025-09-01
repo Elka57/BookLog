@@ -55,6 +55,7 @@ class Book(models.Model):
   type = models.IntegerField(choices=BookTypes.choices, verbose_name="Тип")
   status = models.IntegerField(choices=ApprovalStatus.choices, verbose_name="Статус одобрения")
   created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Добавлено пользователем")
+  description = models.CharField(max_length=200, verbose_name="Описание", null=True, blank=True)
 
   def __str__(self):
     return f'{self.title} - {self.author}'
@@ -77,6 +78,7 @@ class BookLog(models.Model):
   result = models.TextField(verbose_name="Итог", blank=True, null=True)
   created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
   updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+  privat = models.BooleanField(default=False, verbose_name="Приватность")
 
   def __str__(self):
     return f'{self.book} - {self.updated_at}'

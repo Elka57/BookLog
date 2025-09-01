@@ -1,0 +1,26 @@
+# Python
+**/__pycache__/
+**/*.py[cod]
+*.so
+
+# Django
+*.sqlite3
+
+# Virtual environments
+backend/.venv/
+venv/
+.env
+
+# Node.js
+frontend/node_modules/
+
+# Logs, макАртефакты
+*.log
+.DS_Store
+
+# VS Code / Devcontainer
+.vscode/
+.devcontainer/
+
+# Docker overrides
+docker-compose.override.yml
