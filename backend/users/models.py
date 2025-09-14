@@ -16,16 +16,16 @@ class User(AbstractUser):
         blank=True,
         null=True
     )
-    email_confirmed = models.BooleanField(
-        verbose_name="E-mail подтверждён",
-        default=False
-    )
     logo = models.ImageField(
         verbose_name="Картинка профиля",
         upload_to="user_logos/",  
         blank=True,
         null=True
     )
+    email_confirmed = models.BooleanField(
+        verbose_name="Статус подтверждения электронной почты", 
+        default=False
+        )
     user_type = models.IntegerField(choices=UserTypes.choices, verbose_name="Тип", default=UserTypes.READER)
 
     def __str__(self):

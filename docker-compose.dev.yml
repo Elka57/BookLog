@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  devcontainer:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - ./:/workspace:cached
+      - /workspace/backend/.venv
+      - /workspace/frontend/node_modules
+      - ${HOME}/.wakatime.cfg:/root/.wakatime.cfg:ro
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=BookLog.settings.dev
+      - WAKATIME_API_KEY
+    depends_on:
+      - db
+    command: sleep infinity
+    restart: on-failure
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend:/app:cached
+    ports:
+      - '8000:8000'
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=BookLog.settings
+    depends_on:
+      - db
+    command: >
+      sh -c "cd /app && python manage.py runserver 0.0.0.0:8000"
+    restart: on-failure
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/app:cached
+      - /app/node_modules
+    ports:
+      - '3000:3000'
+    depends_on:
+      - backend
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    command: npm start
+    restart: on-failure

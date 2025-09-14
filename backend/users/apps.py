@@ -1,10 +1,11 @@
+# users/apps.py
 from django.apps import AppConfig
 
 class UsersConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'users'
+    name = "users"
 
     def ready(self):
-        # импортируем модуль с сигналами, чтобы они зарегистрировались
-        import users.signals  # noqa
+        # при старте приложения реально импортируем файл с сигнальными хэндлерами
+        import users.signals  
+
 

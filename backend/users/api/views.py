@@ -16,7 +16,6 @@ from users.api.serializers import ProfileDeletionConfirmSerializer
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 
-
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     parser_classes = [MultiPartParser, FormParser, JSONParser]
@@ -36,10 +35,17 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get', 'patch'], url_path='current')
     def current(self, request):
-        user = request.user
+        # если пользователь анонимный — сразу 401
+        if request.user.is_anonymous:
+            return Response(
+                {'detail': 'Пользователь не авторизован'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
+        user = request.user
         if request.method == 'GET':
             serializer = self.get_serializer(user)
+            print("Вот данные сериализатора которые возвращаются по текущему пользователю = ", serializer.data)
             return Response(serializer.data)
 
         serializer = self.get_serializer(user, data=request.data, partial=True)

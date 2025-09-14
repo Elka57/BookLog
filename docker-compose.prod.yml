@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  web:
+    image: your-registry/booklog_web:latest
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=backend.settings.prod
+    ports:
+      - '8000:8000'
+    depends_on:
+      - db
+    restart: always
+    command: >
+      sh -c "gunicorn BookLog.wsgi:application
+             --bind 0.0.0.0:8000
+             --workers 3"
+
+# (Опционально) если нужно отдельно добывать фронтенд-статику:
+#   nginx:
+#     image: nginx:stable-alpine
+#     volumes:
+#       - ./frontend/build:/usr/share/nginx/html:ro
+#     ports:
+#       - '80:80'
+#     depends_on:
+#       - web

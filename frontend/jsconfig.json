@@ -1,0 +1,15 @@
+// frontend/jsconfig.json
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "ESNext",
+    "moduleResolution": "node", // добавляем node-резолв
+    "jsx": "react-jsx",
+    "baseUrl": "src",
+    "paths": {
+      "@mui/material": ["../node_modules/@mui/material"], // указываем явный путь к пакету
+      "@mui/*": ["../node_modules/@mui/*"] // остальные модули MUI
+    }
+  },
+  "include": ["src"]
+}
