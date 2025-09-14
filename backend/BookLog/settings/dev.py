@@ -1,5 +1,6 @@
 from .base import *
 
+print("=== USING DEV SETTINGS ===")
 DEBUG = True
 
 # Разрешить все локальные хосты

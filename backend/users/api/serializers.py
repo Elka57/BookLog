@@ -1,8 +1,12 @@
+import re
 from rest_framework import serializers
 from ..models import User, UserTypes
 
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from rest_framework import serializers
+from django.core.validators import EmailValidator
+
+from allauth.account.models import EmailAddress
 
 class UserSerializer(serializers.ModelSerializer):
     logo = serializers.ImageField(
@@ -17,16 +21,11 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         # Разрешаем менять только эти поля
-        fields = ['id', 'username', 'name', 'email', 'email_confirmed', 'logo']
+        fields = ['id', 'username', 'name', 'email', 'email_confirmed', 'logo', 'user_type']
         read_only_fields = ['id', 'username', 'email_confirmed']
 
+
     def update(self, instance, validated_data):
-        # 1. Обновляем email и сбрасываем флаг подтверждения
-        new_email = validated_data.get('email')
-        if new_email and new_email != instance.email:
-            instance.email = new_email
-            instance.email_confirmed = False
-            # Здесь при необходимости можете вызвать отправку письма
 
         # 2. Обновляем имя
         if 'name' in validated_data:
@@ -54,13 +53,26 @@ class UsernameOrEmailLoginSerializer(LoginSerializer):
     email = serializers.EmailField(required=False, allow_blank=True)
 
     def validate(self, attrs):
-        username = attrs.get("username") or attrs.get("email")
+        username = attrs.get("username")
         password = attrs.get("password")
+        try:
+          EmailValidator()(username)
+          is_email = True
+        except Exception:
+          is_email = False
         if not username or not password:
             raise serializers.ValidationError(
                 "Введите username или email и пароль."
             )
-        user = authenticate(username=username, password=password)
+
+        if is_email:
+          try:
+              u = User.objects.get(email__iexact=username)
+              user = authenticate(username=u.username, password=password)
+          except User.DoesNotExist:
+              user = None
+        else:
+            user = authenticate(username=username, password=password)
         if not user:
             raise serializers.ValidationError(
                 "Неверные учётные данные."
@@ -76,8 +88,9 @@ class CustomRegisterSerializer(RegisterSerializer):
     logo = serializers.ImageField(required=False)
 
     def get_cleaned_data(self):
-        print("Мы в customRegisterSerializer в get_cleaned_data")
+        print("Мы в customRegisterSerializer в get_cleaned_data и вот какие данные = ", )
         data = super().get_cleaned_data()
+        print(self.validated_data)
         data['name'] = self.validated_data.get('name', '')
         data['user_type'] = self.validated_data.get('user_type')
         data['logo'] = self.validated_data.get('logo')
@@ -87,10 +100,17 @@ class CustomRegisterSerializer(RegisterSerializer):
         print("Мы в customRegisterSerializer в save")
         user = super().save(request)  # здесь создаются username/email/password
         user.name = self.cleaned_data.get('name', '')
+        print("У нас в save user_type = ", self.cleaned_data.get('user_type'))
         user.user_type = self.cleaned_data.get('user_type')
+        print("И в пользователе сохраняем = ", user.user_type)
         if self.cleaned_data.get('logo'):
             user.logo = self.cleaned_data.get('logo')
         user.save()
         print("Мы в CustomRegisterSerializer и у нас user = ", user)
         print("А вот и лого в пользователе = ", user.logo)
+        print("А еще у нас че по подтвержденному емейлу = ", user.email_confirmed)
         return user
+
+
+        
+  

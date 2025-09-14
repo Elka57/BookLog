@@ -45,6 +45,7 @@ class UserViewSet(viewsets.ModelViewSet):
         user = request.user
         if request.method == 'GET':
             serializer = self.get_serializer(user)
+            print("Вот данные сериализатора которые возвращаются по текущему пользователю = ", serializer.data)
             return Response(serializer.data)
 
         serializer = self.get_serializer(user, data=request.data, partial=True)

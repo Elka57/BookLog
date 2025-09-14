@@ -18,14 +18,10 @@ createRoot(document.getElementById("root")).render(
           <BrowserRouter>
             <Routes>
               {/* 1) страница подтверждения */}
-              <Route
-                path="/confirm-email/:key"
-                element={<ConfirmEmailPage />}
-              />
+              <Route path="/confirm-email/:key" element={<ConfirmEmailPage />} />
 
               {/* 2) страница входа */}
               <Route path="/login" element={<App page={0} />} />
-
 
               {/* 2) основной SPA */}
               <Route path="/*" element={<App />} />

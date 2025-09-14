@@ -35,7 +35,7 @@ INSTALLED_APPS = [
     'dj_rest_auth.registration',
 
     # Ваши приложения
-    'users',
+    "users.apps.UsersConfig",
     'authentication',
     'journal',
 ]
@@ -99,7 +99,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # REST framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
     ),
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.MultiPartParser',
@@ -114,13 +114,24 @@ REST_FRAMEWORK = {
 }
 
 # JWT
-REST_USE_JWT = True
+# dj-rest-auth
+REST_AUTH = {
+    'USE_JWT': True,
+    'JWT_AUTH_COOKIE': 'booklog-app-auth',
+    'JWT_AUTH_REFRESH_COOKIE': 'booklog-refresh-token',
+
+    'LOGIN_SERIALIZER':  'users.api.serializers.UsernameOrEmailLoginSerializer',
+    'REGISTER_SERIALIZER': 'users.api.serializers.CustomRegisterSerializer',
+}
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
+    #'ROTATE_REFRESH_TOKENS': True,
+    #'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
 }
 
 # Пользователь
@@ -136,20 +147,12 @@ ACCOUNT_EMAIL_VERIFICATION = 'optional'
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 ACCOUNT_PASSWORD_INPUT_RENDER_VALUE = False
 ACCOUNT_ADAPTER = 'users.adapters.FrontendAccountAdapter'
+
 ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = config('FRONTEND_URL')
 ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = config('FRONTEND_URL')
 
-EMAIL_CONFIRM_REDIRECT_BASE_URL = f"{config('FRONTEND_URL')}/email/confirm"
 PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL = f"{config('FRONTEND_URL')}/password-reset/confirm"
-
-# dj-rest-auth
-REST_AUTH_REGISTRATION = {
-    'VERIFY_EMAIL_VIEW': 'users.views.CustomVerifyEmailView',
-    'LOGIN_SERIALIZER':  'users.serializers.UsernameOrEmailLoginSerializer',
-}
-REST_AUTH_SERIALIZERS = {
-    'REGISTER_SERIALIZER': 'users.serializers.CustomRegisterSerializer',
-}
+ACCOUNT_EMAIL_CONFIRMATION_HMAC = False
 
 # Логирование, токены удаления профиля и роли
 PROFILE_DELETION_TOKEN_EXPIRY = 24 * 3600

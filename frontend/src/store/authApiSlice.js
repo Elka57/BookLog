@@ -13,7 +13,6 @@ const baseQuery = fetchBaseQuery({
     }
     return headers;
   },
-  credentials: "include", // если используете куки для csrf
 });
 
 export const authApi = createApi({
@@ -23,6 +22,7 @@ export const authApi = createApi({
     let result = await baseQuery(args, api, extraOptions);
 
     if (result.error?.status === 401) {
+      console.log("Попытка обновить токен");
       const refreshToken = api.getState().auth.refreshToken;
       if (refreshToken) {
         // запрос на обновление Access Token
@@ -110,7 +110,7 @@ export const authApi = createApi({
     // REGISTER → после рега логинимся автоматически
     register: build.mutation({
       query: (formData) => ({
-        url: "auth/register/",
+        url: "auth/registration/",
         method: "POST",
         body: formData, // FormData с полями email*, username*, password1*, password2*
       }),
@@ -133,10 +133,41 @@ export const authApi = createApi({
     // VERIFY EMAIL
     verifyEmail: build.mutation({
       query: (data) => ({
-        url: "auth/register/verify-email/",
+        url: "auth/registration/verify-email/",
         method: "POST",
         body: data, // { key }
       }),
+    }),
+
+    // RESEND EMAIL
+    resendEmail: build.mutation({
+      query: (data) => ({
+        url: "auth/registration/resend-email/",
+        method: "POST",
+        body: data, // {key}
+      }),
+    }),
+
+    // CONFIRM EMAIL
+    confirmEmail: build.mutation({
+      query: (data) => ({
+        url: "auth/registration/verify-email/",
+        method: "POST",
+        body: data, // Я хз что тут должно прийти
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          // форсируем повторный запрос профиля
+          dispatch(
+            authApi.endpoints.fetchCurrentUser.initiate(undefined, {
+              forceRefetch: true,
+            })
+          );
+        } catch {
+          // игнорируем ошибки
+        }
+      },
     }),
 
     // FETCH CURRENT USER
@@ -185,6 +216,8 @@ export const {
   useLogoutMutation,
   useRegisterMutation,
   useVerifyEmailMutation,
+  useResendEmailMutation,
+  useConfirmEmailMutation,
   useFetchCurrentUserQuery,
   useUpdateCurrentUserMutation,
   useRequestProfileDeletionMutation,
